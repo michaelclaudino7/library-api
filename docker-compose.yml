@@ -1,0 +1,36 @@
+﻿services:
+  mongodb:
+    image: mongo:7
+    container_name: library-api-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - library-network
+
+  api:
+    build: .
+    container_name: library-api-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/library-api
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - LOAN_PERIOD_DAYS=${LOAN_PERIOD_DAYS}
+      - FINE_PER_DAY=${FINE_PER_DAY}
+      - PORT=3000
+    depends_on:
+      - mongodb
+    networks:
+      - library-network
+
+networks:
+  library-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
